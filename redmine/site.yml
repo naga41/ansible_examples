@@ -1,0 +1,18 @@
+---
+# This playbook deploys the whole application stack in this site.
+
+# 共通設定を全ホストに対して実行
+- hosts: all
+  sudo: yes
+  roles:
+  - common
+
+# redmineサーバを設定
+- hosts: redmine-server
+  sudo: yes
+  vars:
+    ruby_version: 2.2.2
+  roles:
+  - mysql
+  - redmine
+

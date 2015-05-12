@@ -1,0 +1,4 @@
+---
+- name: mysqlの再起動
+  service: name=mysql state=restarted enabled=yes
+

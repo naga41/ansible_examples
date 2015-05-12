@@ -1,0 +1,6 @@
+---
+rbenv_user:
+  name: rbenv
+  groups: sudo
+  password: $1$SomeSalt$wcv44s9yOd7dhobiYugeD/ #ハッシュ化パスワード:rbenv
+  login_shell: /bin/bash

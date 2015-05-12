@@ -1,0 +1,11 @@
+---
+- name: mysql-serverをインストール
+  apt: pkg=mysql-server
+
+- name: mysqlの設定ファイルを配置
+  template: src=my.cnf.j2 dest=/etc/mysql/my.cnf
+  notify: mysqlの再起動
+
+- name: python-mysqldbをインストール
+  apt: pkg=python-mysqldb
+

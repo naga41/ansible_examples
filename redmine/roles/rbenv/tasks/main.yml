@@ -1,0 +1,75 @@
+---
+- name: gitをインストール(rbenvのインストールに使用)
+  apt: pkg=git
+
+- name: ruby-buildが依存するpackageをインストール
+  apt: pkg={{ item }}
+  with_items:
+    - autoconf
+    - bison
+    - build-essential
+    - libssl-dev
+    - libyaml-dev
+    - libreadline6-dev
+    - zlib1g-dev
+    - libncurses5-dev
+    - libffi-dev
+    - libgdbm3
+    - libgdbm-dev
+
+- name: rbenvユーザーを追加
+  user: name={{ rbenv_user.name }}
+        groups={{ rbenv_user.groups }}
+        password={{ rbenv_user.password }}
+        shell={{ rbenv_user.login_shell }}
+
+- name: rbenvをインストール
+  sudo_user: "{{ rbenv_user.name }}"
+  git: repo=https://github.com/sstephenson/rbenv.git dest=~/.rbenv
+
+- name: rbenvのPATHを.profileに追加
+  sudo_user: "{{ rbenv_user.name }}"
+  lineinfile: >
+    dest="~/.profile"
+    line="export PATH=$HOME/.rbenv/bin:$PATH"
+
+- name: rbenv initを.profileに追加
+  sudo_user: "{{ rbenv_user.name }}"
+  lineinfile: >
+    dest="~/.profile"
+    line='eval "$(rbenv init -)"'
+
+- name: ruby-buildをrbenvのプラグインとしてインストール
+  sudo_user: "{{ rbenv_user.name }}"
+  git: repo=https://github.com/sstephenson/ruby-build.git dest=~/.rbenv/plugins/ruby-build
+
+- name: ruby {{ ruby_version }} がインストールされているか確認
+  sudo_user: "{{ rbenv_user.name }}"
+  shell: "sudo -iu {{ rbenv_user.name }} rbenv versions | grep {{ ruby_version }}"
+  register: rbenv_check_install
+  ignore_errors: true
+  changed_when: false
+
+- name: rubyインストール
+  sudo_user: "{{ rbenv_user.name }}"
+  command: "sudo -iu {{ rbenv_user.name }} rbenv install {{ ruby_version }}"
+  when: rbenv_check_install|failed
+
+- name: ruby {{ ruby_version }} がデフォルト指定されているか確認
+  sudo_user: "{{ rbenv_user.name }}"
+  shell: "sudo -iu {{ rbenv_user.name }} rbenv version | grep {{ ruby_version }}"
+  register: rbenv_check_default
+  ignore_errors: true
+  changed_when: false
+
+- name: defaultのrubyバージョンを指定
+  sudo_user: "{{ rbenv_user.name }}"
+  command: "sudo -iu {{ rbenv_user.name }} rbenv global {{ ruby_version }}"
+  when: rbenv_check_default|failed
+
+- name: 必要なgemをインストール
+  sudo_user: "{{ rbenv_user.name }}"
+  gem: name={{ item }} executable=~/.rbenv/shims/gem user_install=false
+  with_items:
+    - bundler
+
