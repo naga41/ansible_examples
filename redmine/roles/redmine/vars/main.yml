@@ -11,3 +11,13 @@ redmine_version: 3.0.3
 
 redmine_install_dir: /opt/redmines/redmine
 redmine_ap_server: unicorn
+
+redmine_mail_config:
+  address: 'hoge.com'
+  port: 587
+  authentication: :plain
+  domain:    'localdomain'
+  user_name: 'hoge'
+  password:  'hoge'
+  openssl_verify_mode: 'none'
+
