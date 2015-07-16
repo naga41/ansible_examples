@@ -1,0 +1,29 @@
+---
+
+- name: Set Plugin Info
+  set_fact:
+    plugin_name: 'clipboard_image_paste'
+    plugin_version: '1.10'
+    plugin_url: 'https://github.com/peclik/clipboard_image_paste/archive/'
+
+- name: プラグイン名
+  debug: msg="{{ plugin_name }}"
+
+- name: ソースをダウンロード
+  get_url:
+    url={{ plugin_url }}/v{{ plugin_version }}.zip
+    dest=/usr/local/src/{{ plugin_name }}-v{{ plugin_version }}.zip
+
+- name: ソースを展開
+  sudo_user: "{{ redmine_user.name }}"
+  unarchive:
+    src=/usr/local/src/{{ plugin_name }}-v{{ plugin_version }}.zip
+    dest=/opt/redmines/redmine/plugins
+    copy=no
+    creates=/opt/redmines/redmine/plugins/{{ plugin_name }}/README.textile
+
+- name: フォルダ名リネーム
+  command: mv {{ plugin_name }}-{{ plugin_version }} {{ plugin_name }}
+  args:
+    chdir:   /opt/redmines/redmine/plugins/
+    creates: /opt/redmines/redmine/plugins/{{ plugin_name }}/README.textile

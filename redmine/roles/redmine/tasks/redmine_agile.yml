@@ -1,0 +1,27 @@
+---
+
+- name: Set Plugin Info
+  set_fact:
+    plugin_name: 'redmine_agile'
+    plugin_version: '1_3_9-light'
+    plugin_url: 'http://www.redminecrm.com/projects/agile/pages/1'
+
+- name: プラグイン名
+  debug: msg={{ plugin_name }}
+
+- name: ソースを配置
+  copy:
+    src={{ plugin_name }}-{{ plugin_version }}.zip
+    dest=/usr/local/src/
+    owner=root
+    group=root
+    mode=0644
+
+- name: ソースを展開
+  sudo_user: "{{ redmine_user.name }}"
+  unarchive:
+    src=/usr/local/src/{{ plugin_name }}-{{ plugin_version }}.zip
+    dest=/opt/redmines/redmine/plugins
+    copy=no
+    creates=/opt/redmines/redmine/plugins/{{ plugin_name }}/README.rdoc
+
