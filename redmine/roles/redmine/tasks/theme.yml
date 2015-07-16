@@ -1,0 +1,9 @@
+---
+#
+# テーマのインストールはここで
+#
+
+- include: theme_a1.yml
+- include: theme_basecamp.yml
+- include: theme_gitmike.yml
+
