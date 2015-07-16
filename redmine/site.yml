@@ -12,6 +12,11 @@
   sudo: yes
   vars:
     ruby_version: 2.2.2
+    rbenv_user:
+      name: redmine
+      groups: sudo
+      password: $1$SomeSalt$vLNQt/gk1af5Cbgrx38Gx/ #ハッシュ化パスワード:redmine
+      login_shell: /bin/bash
   roles:
   - mysql
   - redmine
