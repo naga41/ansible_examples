@@ -1,0 +1,29 @@
+---
+
+- name: Set Plugin Info
+  set_fact:
+    plugin_name: 'redmine_issue_templates'
+    plugin_version: '0.1.0'
+    plugin_url: 'https://bitbucket.org/akiko_pusu/redmine_issue_templates/downloads'
+
+- name: プラグイン名
+  debug: msg={{ plugin_name }}
+
+- name: ソースをダウンロード
+  get_url:
+    url={{ plugin_url }}/{{ plugin_name }}-{{ plugin_version }}.zip
+    dest=/usr/local/src/{{ plugin_name }}-{{ plugin_version }}.zip
+
+- name: ソースを展開
+  sudo_user: "{{ redmine_user.name }}"
+  unarchive:
+    src=/usr/local/src/{{ plugin_name }}-{{ plugin_version }}.zip
+    dest=/opt/redmines/redmine/plugins
+    copy=no
+    creates=/opt/redmines/redmine/plugins/{{ plugin_name }}/README.rdoc
+
+- name: フォルダ名リネーム
+  command: mv akiko_pusu-{{ plugin_name }}-c9f459bc1140 {{ plugin_name }}
+  args:
+    chdir:   /opt/redmines/redmine/plugins/
+    creates: /opt/redmines/redmine/plugins/{{ plugin_name }}/README.rdoc

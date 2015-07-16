@@ -1,0 +1,27 @@
+---
+
+- name: Set Theme Info
+  set_fact:
+    theme_name: 'a1_theme'
+    theme_version: '1_1_3'
+    theme_url: 'http://www.redminecrm.com/license_manager/14517'
+
+- name: テーマ名
+  debug: msg={{ theme_name }}
+
+- name: ソースを配置
+  copy:
+    src={{ theme_name }}-{{ theme_version }}.zip
+    dest=/usr/local/src/
+    owner=root
+    group=root
+    mode=0644
+
+- name: ソースを展開
+  sudo_user: "{{ redmine_user.name }}"
+  unarchive:
+    src=/usr/local/src/{{ theme_name }}-{{ theme_version }}.zip
+    dest=/opt/redmines/redmine/public/themes
+    copy=no
+    creates=/opt/redmines/redmine/public/themes/a1
+

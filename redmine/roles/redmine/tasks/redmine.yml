@@ -1,0 +1,128 @@
+---
+
+- name: DBを作成
+  mysql_db:
+    db={{ redmine_dbname }}
+    state=present
+    encoding=utf8
+
+- name: DBユーザを作成
+  mysql_user:
+    name={{ redmine_dbuser }}
+    password={{ redmine_dbuser_password }}
+    priv=redmine.*:ALL
+    state=present
+
+- name: redmine用ディレクトリを作成
+  file:
+    path=/opt/redmines
+    state=directory
+    owner=redmine
+    group=redmine
+    mode=0755
+
+- name: redmineソースをダウンロード
+  get_url:
+    url=http://www.redmine.org/releases/redmine-{{ redmine_version }}.tar.gz
+    dest=/usr/local/src/redmine-{{ redmine_version }}.tar.gz
+
+- name: redmineソースを展開
+  sudo_user: "{{ redmine_user.name }}"
+  unarchive:
+    src=/usr/local/src/redmine-{{ redmine_version }}.tar.gz
+    dest=/opt/redmines
+    copy=no
+    creates=/opt/redmines/redmine-{{ redmine_version }}
+
+- name: 稼働系redmine用のsymlink作成
+  file:
+    src=/opt/redmines/redmine-{{ redmine_version }}
+    dest={{ redmine_install_dir }}
+    owner=redmine
+    group=redmine
+    state=link
+
+- name: redmineのDB設定ファイルを配置
+  template:
+    src=database.yml.j2
+    dest={{ redmine_install_dir }}/config/database.yml
+    owner=redmine
+    group=redmine
+  # notify: redmineの再起動
+
+- name: 依存パッケージをインストール
+  apt: pkg={{ item }}
+  with_items:
+    - imagemagick # for rmagick
+    - libmagickwand-dev # for rmagick
+    - libmysqlclient-dev # for mysql2
+
+- name: Gemfile.localを配置
+  template:
+    src=Gemfile.local.j2
+    dest={{ redmine_install_dir }}/Gemfile.local
+    owner=redmine
+    group=redmine
+
+- name: Gemfileのgemが全てインストールされているか確認
+  sudo_user: "{{ redmine_user.name }}"
+  shell:
+    /home/{{ redmine_user.name }}/.rbenv/shims/bundle check
+  args:
+    chdir: "{{ redmine_install_dir }}"
+  register: bundle_check
+  ignore_errors: true
+  changed_when: false
+
+- name: bundle install
+  sudo_user: "{{ redmine_user.name }}"
+  shell:
+    /home/{{ redmine_user.name }}/.rbenv/shims/bundle install \
+    --without development test \
+    --path vendor/bundle
+  args:
+    chdir: "{{ redmine_install_dir }}"
+  when: bundle_check|failed
+
+- name: セッションストア秘密鍵を生成
+  sudo_user: "{{ redmine_user.name }}"
+  shell:
+    /home/{{ redmine_user.name }}/.rbenv/shims/bundle exec \
+    rake generate_secret_token
+  args:
+    chdir: "{{ redmine_install_dir }}"
+    creates: "{{ redmine_install_dir }}/config/initializers/secret_token.rb"
+
+- name: テーブル作成
+  sudo_user: "{{ redmine_user.name }}"
+  shell:
+    /home/{{ redmine_user.name }}/.rbenv/shims/bundle exec \
+    rake db:migrate RAILS_ENV=production
+  args:
+    chdir: "{{ redmine_install_dir }}"
+    creates: "{{ redmine_install_dir }}/db/schema.rb"
+
+- name: デフォルトデータ登録
+  sudo_user: "{{ redmine_user.name }}"
+  shell:
+    /home/{{ redmine_user.name }}/.rbenv/shims/bundle exec \
+    rake redmine:load_default_data RAILS_ENV=production REDMINE_LANG=ja \
+    > redmine_load_default_data.log
+  args:
+    chdir: "{{ redmine_install_dir }}"
+    creates: "{{ redmine_install_dir }}/redmine_load_default_data.log"
+
+- name: unicornの設定ファイルを配置
+  template:
+    src=unicorn.rb.j2
+    dest={{ redmine_install_dir }}/config/unicorn.rb
+    owner=redmine
+    group=redmine
+
+- name: mail設定ファイルを配置
+  template:
+    src=configuration.yml.j2
+    dest={{ redmine_install_dir }}/config/configuration.yml
+    owner=redmine
+    group=redmine
+

@@ -1,0 +1,17 @@
+---
+
+- name: Set Theme Info
+  set_fact:
+    theme_name: 'gitmike'
+    theme_version: ''
+    theme_url: 'https://github.com/makotokw/redmine-theme-gitmike.git'
+
+- name: テーマ名
+  debug: msg={{ theme_name }}
+
+- name: ソースをクローン
+  sudo_user: "{{ redmine_user.name }}"
+  command: git clone {{ theme_url }} {{ theme_name }}
+  args:
+    chdir:   /opt/redmines/redmine/public/themes
+    creates: /opt/redmines/redmine/public/themes/{{ theme_name }}

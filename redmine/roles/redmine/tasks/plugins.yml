@@ -1,0 +1,27 @@
+---
+#
+# プラグインのインストールはここで
+#
+
+- name: 必要パッケージをインストール
+  apt: pkg={{ item }}
+  with_items:
+    - unzip # ソース解凍用
+
+- include: redmine_agile.yml
+- include: redmine_absolute_dates.yml
+- include: redmine_clipboard_image_paste.yml
+- include: redmine_importer.yml
+- include: redmine_issue_templates.yml
+- include: redmine_sidebar_hide.yml
+- include: redmine_theme_changer.yml
+- include: redmine_wiki_extensions.yml
+
+- name: migrate
+  sudo_user: "{{ redmine_user.name }}"
+  shell:
+    /home/{{ redmine_user.name }}/.rbenv/shims/bundle exec \
+    rake redmine:plugins:migrate RAILS_ENV=production
+  args:
+    chdir: "{{ redmine_install_dir }}"
+    #creates: "{{ redmine_install_dir }}/db/schema.rb"
