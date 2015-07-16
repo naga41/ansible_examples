@@ -26,5 +26,5 @@
   command: mv {{ plugin_name }}-{{ plugin_version }} {{ plugin_name }}
   args:
     chdir:   /opt/redmines/redmine/plugins/
-    creates: /opt/redmines/redmine/plugins/{{ plugin_name }}/README.rdoc
+    creates: /opt/redmines/redmine/plugins/{{ plugin_name }}/README.md
 
