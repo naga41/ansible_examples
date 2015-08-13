@@ -1,0 +1,14 @@
+---
+
+- name: nginx連携用の設定ファイルを配置
+  template: src=nginx_redmine_unicorn.j2 dest=/etc/nginx/sites-available/nginx_redmine_unicorn
+  notify: nginxの再起動
+
+- name: nginx連携用の設定ファイルのsymlink作成
+  file:
+    src=/etc/nginx/sites-available/nginx_redmine_unicorn
+    dest=/etc/nginx/sites-enabled/default
+    owner=root
+    group=root
+    state=link
+  notify: nginxの再起動

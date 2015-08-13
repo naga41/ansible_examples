@@ -7,3 +7,4 @@
 - include: redmine.yml
 - include: plugins.yml
 - include: theme.yml
+- include: nginx_redmine.yml

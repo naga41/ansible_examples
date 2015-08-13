@@ -1,0 +1,36 @@
+upstream redmine_unicorn_server {
+  server unix:{{ redmine_install_dir }}/tmp/sockets/redmine.sock fail_timeout=0;
+}
+
+server {
+  listen   80;
+  server_name default_server;
+
+  access_log  /var/log/nginx/access.log ltsv;
+
+  location / {
+    root   {{ redmine_install_dir }}/public;
+    index  index.html index.htm;
+    try_files $uri $uri/index.html $uri.html @unicorn;
+  }
+
+  location @unicorn {
+    proxy_set_header Host            $host;
+    #proxy_set_header X-Real-IP       $remote_addr;
+    #proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_read_timeout 180;
+    proxy_send_timeout 180;
+    proxy_connect_timeout 180;
+
+    proxy_pass http://redmine_unicorn_server;
+  }
+
+  # for monitoring
+  #location /nginx_status {
+  #  stub_status on;
+  #  access_log off;
+  #  allow 127.0.0.1;
+  #  deny all;
+  #}
+
+}
