@@ -20,7 +20,7 @@
     src=/usr/local/src/{{ plugin_name }}-{{ plugin_version }}.zip
     dest=/opt/redmines/redmine/plugins
     copy=no
-    creates=/opt/redmines/redmine/plugins/{{ plugin_name }}/README.rdoc
+    creates=/opt/redmines/redmine/plugins/{{ plugin_name }}/README.md
 
 - name: フォルダ名リネーム
   command: mv {{ plugin_name }}-{{ plugin_version }} {{ plugin_name }}
