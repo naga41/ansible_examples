@@ -1,0 +1,5 @@
+---
+
+- name: nginxの再起動
+  service: name=nginx state=restarted enabled=yes
+

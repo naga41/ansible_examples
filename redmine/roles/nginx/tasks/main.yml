@@ -1,0 +1,8 @@
+---
+
+- name: nginxをインストール
+  apt: pkg=nginx
+
+- name: nginxの設定ファイルを配置
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify: nginxの再起動
