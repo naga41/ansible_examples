@@ -1,0 +1,28 @@
+---
+- name: apt-get update
+  apt: update_cache=yes
+
+- name: 依存パッケージをインストール
+  apt: pkg={{ item }}
+  with_items:
+    - git
+    - openjdk-7-jdk
+
+- name: gitbucketグループを追加
+  user: name=gitbucket
+
+- name: gitbucketユーザーを追加
+  user: name=gitbucket
+        group=gitbucket
+        password=$1$SomeSalt$JSCwfYQTKWlOBvdIMC3iI1
+        shell=/bin/bash
+        home=/var/lib/gitbucket
+
+- name: gitbucket.jarをダウンロード
+  get_url:
+    url=https://github.com/takezoe/gitbucket/releases/download/3.5/gitbucket.war
+    dest=/usr/local/src/gitbucket.war
+
+- name: 起動スクリプトを配置
+  template: src=gitbucket.init.j2 dest=/etc/init.d/gitbucket mode=755
+  notify: gitbucketの再起動
