@@ -1,0 +1,15 @@
+---
+# This playbook deploys the whole application stack in this site.
+
+# 共通設定を全ホストに対して実行
+- hosts: all
+  sudo: yes
+  roles:
+  - common
+
+# gitbucketサーバを設定
+- hosts: gitbucket-server
+  sudo: yes
+  roles:
+  - gitbucket
+

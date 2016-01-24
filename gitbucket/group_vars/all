@@ -1,0 +1,7 @@
+---
+admin_user:
+  name: admin
+  groups: sudo
+  password: $1$SomeSalt$Po1/Fe78NQWawepBM7IZW1 #ハッシュ化パスワード
+  login_shell: /bin/bash
+

@@ -1,0 +1,10 @@
+---
+- name: adminユーザーを追加
+  user: name={{ admin_user.name }}
+        groups={{ admin_user.groups }}
+        password={{ admin_user.password }}
+        shell={{ admin_user.login_shell }}
+
+- name: vimをインストール
+  action: "{{ ansible_pkg_mgr }} name=vim"
+

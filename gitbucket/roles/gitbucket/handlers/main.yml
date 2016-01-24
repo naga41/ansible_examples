@@ -1,0 +1,5 @@
+---
+
+- name: gitbucketの再起動
+  service: name=gitbucket state=restarted enabled=yes
+
