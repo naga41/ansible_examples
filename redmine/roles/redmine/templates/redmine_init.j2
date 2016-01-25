@@ -1,0 +1,108 @@
+### BEGIN INIT INFO
+# Provides:          Redmine
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start unicorn daemon at boot time
+# Description:       Start app by unicorn
+### END INIT INFO
+
+#
+# Redmine Startup script for unicorn.
+#
+# chkconfig: - 85 15
+# description: Redmine on unicorn start/stop script.
+#
+
+USER=redmine
+NAME=redmine
+ENVIRONMENT=production
+ROOT_DIR={{ redmine_install_dir }}
+PID="${ROOT_DIR}/tmp/pids/unicorn.pid"
+CONF="${ROOT_DIR}/config/unicorn.rb"
+
+start()
+{
+  if [ -e $PID ]; then
+    echo "$NAME already started";
+    exit 1;
+  fi
+  echo "start $NAME";
+  su - ${USER} -c "cd $ROOT_DIR && BUNDLE_GEMFILE=${ROOT_DIR}/Gemfile bundle exec unicorn -c ${CONF} -E ${ENVIRONMENT} -D"
+
+}
+
+stop()
+{
+  if [ ! -e $PID ]; then
+    echo "$NAME not started";
+  else
+    echo "stop $NAME";
+    kill -QUIT `cat ${PID}`
+    rm -f $PID
+  fi
+}
+
+force_stop()
+{
+  if [ ! -e $PID ]; then
+    echo "$NAME not started";
+    exit 1;
+  fi
+  echo "stop $NAME";
+  kill -TERM `cat ${PID}`
+  rm -f $PID
+}
+
+reload()
+{
+  if [ ! -e $PID ]; then
+    echo "$NAME not started";
+    start
+    exit 0;
+  fi
+  echo "reload $NAME";
+  kill -USR2 `cat ${PID}`
+}
+
+restart()
+{
+  stop
+  start
+}
+
+rotate()
+{
+  if [ ! -e $PID ]; then
+    echo "$NAME not started";
+    start
+    exit 0;
+  fi
+  echo "$NAME reopened log";
+  kill -USR1 `cat ${PID}`
+}
+
+case "$1" in
+  start)
+    start
+    ;;
+  stop)
+    stop
+    ;;
+  force-stop)
+    force_stop
+    ;;
+  reload)
+    reload
+    ;;
+  restart)
+    restart
+    ;;
+  rotate)
+    rotate
+    ;;
+  *)
+    echo "Syntax Error: release [start|stop|force-stop|reload|restart]"
+    ;;
+esac

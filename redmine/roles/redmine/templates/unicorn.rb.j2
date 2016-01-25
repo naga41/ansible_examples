@@ -5,6 +5,7 @@ worker_processes 2
 preload_app true
 timeout 180
 listen "#{working_directory_path}/tmp/sockets/redmine.sock"
+pid "#{working_directory_path}/tmp/pids/unicorn.pid"
 
 stderr_path "log/unicorn.stderr.log"
 stdout_path "log/unicorn.stdout.log"
