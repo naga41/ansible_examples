@@ -112,12 +112,30 @@
     chdir: "{{ redmine_install_dir }}"
     creates: "{{ redmine_install_dir }}/redmine_load_default_data.log"
 
+- name: unicornのpid用ディレクトリを作成
+  file:
+    path={{ redmine_install_dir }}/tmp/pids
+    state=directory
+    owner=redmine
+    group=redmine
+    mode=0755
+
+- name: unicornの起動スクリプトを配置
+  template:
+    src=redmine_init.j2
+    dest=/etc/init.d/redmine
+    owner=root
+    group=root
+    mode=755
+  notify: redmineの再起動
+
 - name: unicornの設定ファイルを配置
   template:
     src=unicorn.rb.j2
     dest={{ redmine_install_dir }}/config/unicorn.rb
     owner=redmine
     group=redmine
+  notify: redmineの再起動
 
 - name: mail設定ファイルを配置
   template:
